@@ -18,3 +18,24 @@ def generate_quiz():
         return response.json()
     except requests.exceptions.RequestException as e:
         return {'error': str(e)}
+import random
+
+def rank_candidates(applications):
+    """
+    Dummy ranking function.
+    In a real implementation, you would integrate your CV ranking algorithm
+    (e.g. from your Jupyter Notebook code) here.
+    For now, this function assigns a random score between 0 and 100 to each application.
+    """
+    ranked = []
+    for app in applications:
+        score = random.uniform(0, 100)  # Replace this with your real ranking logic
+        ranked.append({
+            'application_id': app.id,
+            'candidate_id': app.candidate_id,
+            'resume_path': app.resume_path,
+            'score': score
+        })
+    # Sort candidates by score in descending order
+    ranked.sort(key=lambda x: x['score'], reverse=True)
+    return ranked

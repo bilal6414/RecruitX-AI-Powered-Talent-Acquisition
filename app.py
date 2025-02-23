@@ -1,20 +1,23 @@
+import os
+import sqlite3
+import json
 from flask import Flask, render_template, request, redirect, url_for, flash, session, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
 from flask_jwt_extended import JWTManager, create_access_token
-from sqlalchemy.exc import IntegrityError
-from utils import generate_quiz
 from werkzeug.utils import secure_filename
-import os, sqlite3, json
+import utils  # Now we import the whole utils module to access rank_candidates
 
+# --------------------------------------------------
 # Set up the Flask app to use the instance folder.
+# The database file will be stored in the instance folder.
+# --------------------------------------------------
 app = Flask(__name__, instance_relative_config=True)
 try:
     os.makedirs(app.instance_path)
 except OSError:
     pass
 
-# Use the database file located in the instance folder.
 db_path = os.path.join(app.instance_path, 'site.db')
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + db_path
 app.config['JWT_SECRET_KEY'] = 'supersecretkey'
@@ -109,7 +112,7 @@ class Application(db.Model):
 # Endpoints
 # --------------------------------------------------
 
-# Home page shows a professional project summary.
+# Home page with professional project summary.
 @app.route('/')
 def home():
     company_summary = """
@@ -139,16 +142,9 @@ def signup():
         try:
             db.session.add(new_user)
             db.session.commit()
-        except IntegrityError:
-            db.session.rollback()
-            flash("An account with this email already exists. Please try signing in.", "danger")
-            return redirect(url_for('signup'))
         except Exception as e:
             db.session.rollback()
-            if app.debug:
-                flash(f"Unexpected error: {str(e)}", "danger")
-            else:
-                flash("An unexpected error occurred. Please try again later.", "danger")
+            flash("An account with this email may already exist or another error occurred.", "danger")
             return redirect(url_for('signup'))
         flash('User created successfully. Please sign in.', 'success')
         return redirect(url_for('signin'))
@@ -183,7 +179,7 @@ def quiz():
     if 'user_id' not in session:
         flash('Please sign in first.', 'warning')
         return redirect(url_for('signin'))
-    quiz_data = generate_quiz()
+    quiz_data = utils.generate_quiz()
     return render_template('quiz.html', quiz=quiz_data)
 
 
@@ -223,7 +219,7 @@ def post_job():
     return render_template('post_job.html')
 
 
-# Candidate: View Jobs.
+# Candidate: View Job Listings.
 @app.route('/jobs')
 def jobs():
     jobs_list = JobPosting.query.filter_by(status="Open").all()
@@ -265,6 +261,22 @@ def applied_jobs():
         return redirect(url_for('signin'))
     applications = Application.query.filter_by(candidate_id=session['user_id']).all()
     return render_template('applied_jobs.html', applications=applications)
+
+
+# New endpoint: Company can view and rank all candidate applications for its jobs.
+@app.route('/company/rank_candidates')
+def rank_candidates():
+    if 'user_id' not in session or session.get('user_type') != 'company':
+        flash("Unauthorized access", "danger")
+        return redirect(url_for('signin'))
+    # Get all jobs posted by the company.
+    jobs = JobPosting.query.filter_by(company_id=session['user_id']).all()
+    job_ids = [job.id for job in jobs]
+    # Get all applications for these jobs.
+    applications = Application.query.filter(Application.job_id.in_(job_ids)).all()
+    # Rank candidates using the utility function.
+    ranked_list = utils.rank_candidates(applications)
+    return render_template('cv_ranking.html', ranked_list=ranked_list)
 
 
 if __name__ == '__main__':

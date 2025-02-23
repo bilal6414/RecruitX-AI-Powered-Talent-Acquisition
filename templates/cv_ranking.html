@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}CV Ranking{% endblock %}
+{% block content %}
+  <h2>Ranked Candidates</h2>
+  {% if ranked_list %}
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          <th>Rank</th>
+          <th>Application ID</th>
+          <th>Candidate ID</th>
+          <th>Resume</th>
+          <th>Score</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for candidate in ranked_list %}
+          <tr>
+            <td>{{ loop.index }}</td>
+            <td>{{ candidate.application_id }}</td>
+            <td>{{ candidate.candidate_id }}</td>
+            <td>{{ candidate.resume_path }}</td>
+            <td>{{ "%.2f"|format(candidate.score) }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <p>No applications available for ranking.</p>
+  {% endif %}
+  <!-- Optionally, add a button to trigger re-ranking -->
+  <a href="{{ url_for('rank_candidates') }}" class="btn btn-primary">Re-Rank Candidates</a>
+{% endblock %}
