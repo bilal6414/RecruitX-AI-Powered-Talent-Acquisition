@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}Post Job{% endblock %}
+{% block content %}
+  <h2>Post a New Job</h2>
+  <form method="POST" action="{{ url_for('post_job') }}">
+    <div class="form-group">
+      <label for="title">Job Title</label>
+      <input type="text" name="title" class="form-control" id="title" required>
+    </div>
+    <div class="form-group">
+      <label for="description">Job Description</label>
+      <textarea name="description" class="form-control" id="description" rows="5" required></textarea>
+    </div>
+    <div class="form-group">
+      <label for="required_skills">Required Skills</label>
+      <input type="text" name="required_skills" class="form-control" id="required_skills" required>
+    </div>
+    <div class="form-group">
+      <label for="experience">Experience</label>
+      <input type="text" name="experience" class="form-control" id="experience" required>
+    </div>
+    <button type="submit" class="btn btn-primary">Post Job</button>
+  </form>
+{% endblock %}

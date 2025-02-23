@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}Job Listings{% endblock %}
+{% block content %}
+  <h2>Available Jobs</h2>
+  {% if jobs %}
+    <div class="list-group">
+      {% for job in jobs %}
+        <a href="{{ url_for('apply', job_id=job.id) }}" class="list-group-item list-group-item-action">
+          <h5 class="mb-1">{{ job.title }}</h5>
+          <p class="mb-1">{{ job.description }}</p>
+          <small>Skills: {{ job.required_skills }} | Experience: {{ job.experience }}</small>
+        </a>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p>No job postings available at the moment.</p>
+  {% endif %}
+{% endblock %}

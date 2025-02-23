@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}Home - Recruitment Platform{% endblock %}
+{% block content %}
+  <div class="jumbotron">
+    <h1 class="display-4">Welcome to Our Recruitment Platform</h1>
+    <p class="lead">
+      {{ company_summary|safe }}
+    </p>
+    <hr class="my-4">
+    <p>
+      Streamlining the hiring process with AI-powered assessments and experienced recruiters.
+    </p>
+    <a class="btn btn-primary btn-lg" href="{{ url_for('signin') }}" role="button">Get Started</a>
+  </div>
+{% endblock %}

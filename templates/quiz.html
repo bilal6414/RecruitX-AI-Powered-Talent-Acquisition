@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}Quiz{% endblock %}
+{% block content %}
+  <h2>Quiz</h2>
+  {% if quiz.error %}
+    <div class="alert alert-danger">{{ quiz.error }}</div>
+  {% else %}
+    <!-- Display the quiz JSON for now -->
+    <pre>{{ quiz|tojson(indent=2) }}</pre>
+  {% endif %}
+  <form method="POST" action="{{ url_for('submit_quiz') }}" id="quizForm">
+    <!-- In a real application, you would have input fields for each question -->
+    <input type="hidden" name="answers" id="answers" value="[]">
+    <button type="submit" class="btn btn-success">Submit Quiz</button>
+  </form>
+{% endblock %}
